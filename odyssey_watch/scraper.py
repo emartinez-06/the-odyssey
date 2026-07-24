@@ -43,9 +43,17 @@ def fetch_seatmap_html(
 
     response = None
     for attempt in range(_RATE_LIMIT_RETRIES + 1):
-        response = requests.get(
-            _SEATMAP_URL, params=params, headers=headers, timeout=_TIMEOUT_SECONDS
-        )
+        try:
+            response = requests.get(
+                _SEATMAP_URL, params=params, headers=headers, timeout=_TIMEOUT_SECONDS
+            )
+        except requests.exceptions.RequestException as exc:
+            if attempt == _RATE_LIMIT_RETRIES:
+                raise SeatmapFetchError(
+                    f"showtime {showtime_id}: request failed ({exc})"
+                ) from exc
+            time.sleep(_RATE_LIMIT_BACKOFF_SECONDS * (attempt + 1))
+            continue
         if response.status_code != 429 or attempt == _RATE_LIMIT_RETRIES:
             break
         time.sleep(_RATE_LIMIT_BACKOFF_SECONDS * (attempt + 1))
