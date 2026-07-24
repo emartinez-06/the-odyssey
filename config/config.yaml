@@ -1,0 +1,53 @@
+# Odyssey seat watcher configuration.
+# Nothing in this file is secret - it's safe to commit and edit directly.
+
+theater:
+  id: 207
+  name: "Cinemark Dallas XD and IMAX"
+  timezone: "America/Chicago"
+
+movie:
+  id: 104867
+  name: "The Odyssey (IMAX 70mm)"
+
+# Showtimes to watch. Cinemark only opens a showtime's seat map once it's
+# on sale, so add new dates as they're published.
+#
+# To find a new showtime's id: open the movie page for your theater
+# (https://www.cinemark.com/movies/the-odyssey-imax-70mm?showDate=YYYY-MM-DD),
+# open dev tools, and inspect a showtime button's link - it points to
+# /TicketSeatMap/?TheaterId=...&ShowtimeId=...&CinemarkMovieId=...&Showtime=...
+# Copy the ShowtimeId and the Showtime timestamp (local time, no offset)
+# into an entry below.
+showtimes:
+  - id: 640217
+    datetime: "2026-08-18T07:45:00"
+  - id: 640213
+    datetime: "2026-08-18T11:30:00"
+  - id: 640214
+    datetime: "2026-08-18T15:15:00"
+  - id: 640215
+    datetime: "2026-08-18T19:00:00"
+  - id: 640216
+    datetime: "2026-08-18T22:45:00"
+
+# "Prime middle" seats: the block of rows and seat numbers worth a
+# notification. Row letters and seat numbers match what's printed on
+# Cinemark's seat map (e.g. row "F", seats 10-17). Tune this to taste -
+# smaller range = pickier, larger range = more notifications.
+prime_seats:
+  rows: ["E", "F", "G", "H"]
+  seat_number_range: [10, 17]
+
+# Only notify about showtimes whose start time falls inside one of these
+# local-time windows (theater timezone, 24-hour "HH:MM" clock). An empty
+# list means "never notify for showtimes on this day." Edit this to match
+# your real schedule - the values below are just a starting point.
+availability_windows:
+  monday: []
+  tuesday: []
+  wednesday: []
+  thursday: []
+  friday: [["00:00", "23:59"]]
+  saturday: [["00:00", "23:59"]]
+  sunday: [["00:00", "23:59"]]
