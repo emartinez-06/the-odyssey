@@ -5,49 +5,52 @@ theater:
   id: 207
   name: "Cinemark Dallas XD and IMAX"
   timezone: "America/Chicago"
+  # The path segment of this theater's own page, i.e. the part after
+  # cinemark.com/theatres/ - visit https://www.cinemark.com/theatres and
+  # find your theater to get this.
+  detail_path: "tx-dallas/cinemark-dallas-xd-and-imax"
 
 movie:
   id: 104867
   name: "The Odyssey (IMAX 70mm)"
 
-# Showtimes to watch. Cinemark only opens a showtime's seat map once it's
-# on sale, so add new dates as they're published.
-#
-# To find a new showtime's id: open the movie page for your theater
-# (https://www.cinemark.com/movies/the-odyssey-imax-70mm?showDate=YYYY-MM-DD),
-# open dev tools, and inspect a showtime button's link - it points to
-# /TicketSeatMap/?TheaterId=...&ShowtimeId=...&CinemarkMovieId=...&Showtime=...
-# Copy the ShowtimeId and the Showtime timestamp (local time, no offset)
-# into an entry below.
-showtimes:
-  - id: 640217
-    datetime: "2026-08-18T07:45:00"
-  - id: 640213
-    datetime: "2026-08-18T11:30:00"
-  - id: 640214
-    datetime: "2026-08-18T15:15:00"
-  - id: 640215
-    datetime: "2026-08-18T19:00:00"
-  - id: 640216
-    datetime: "2026-08-18T22:45:00"
+# How far ahead discover.py looks for newly-published showtimes, in days.
+# Cinemark opens tickets on a rolling ~26-day window, so this only needs a
+# little headroom beyond that.
+discovery:
+  lookahead_days: 32
+
+# Showtimes to watch, in addition to whatever discover.py finds
+# automatically (see state/discovered_showtimes.json). Normally left
+# empty - only use this to pin a specific showtime discover.py hasn't
+# picked up yet, or to track a different movie/theater by hand. Same
+# format as the entries discover.py writes: id = Cinemark's ShowtimeId,
+# datetime = the local-time "Showtime" value with no UTC offset.
+showtimes: []
 
 # "Prime middle" seats: the block of rows and seat numbers worth a
 # notification. Row letters and seat numbers match what's printed on
-# Cinemark's seat map (e.g. row "F", seats 10-17). Tune this to taste -
-# smaller range = pickier, larger range = more notifications.
+# Cinemark's seat map. This theater (207) has rows A-D up front (skip -
+# too close) and E-K as the main stadium-seating block; any seat in row E
+# or further back is considered good regardless of left/right position.
 prime_seats:
-  rows: ["E", "F", "G", "H"]
-  seat_number_range: [10, 17]
+  rows: ["E", "F", "G", "H", "J", "K"]
+  seat_number_range: [1, 26]
 
 # Only notify about showtimes whose start time falls inside one of these
 # local-time windows (theater timezone, 24-hour "HH:MM" clock). An empty
-# list means "never notify for showtimes on this day." Edit this to match
-# your real schedule - the values below are just a starting point.
+# list means "never notify for showtimes on this day."
+#
+# Windows are centered on specific showtimes (+/- 20 min) rather than
+# left wide open, since only some times of day are actually attendable:
+#   Friday: the 3:15pm or 7:00pm show
+#   Saturday/Sunday: the 11:30am, 3:15pm, or 7:00pm show
+#   Monday-Thursday: not currently free for any showtime
 availability_windows:
   monday: []
   tuesday: []
   wednesday: []
   thursday: []
-  friday: [["00:00", "23:59"]]
-  saturday: [["00:00", "23:59"]]
-  sunday: [["00:00", "23:59"]]
+  friday: [["14:55", "15:35"], ["18:40", "19:20"]]
+  saturday: [["11:10", "11:50"], ["14:55", "15:35"], ["18:40", "19:20"]]
+  sunday: [["11:10", "11:50"], ["14:55", "15:35"], ["18:40", "19:20"]]

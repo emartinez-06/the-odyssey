@@ -1,20 +1,19 @@
-name: Watch Odyssey Seats
+name: Discover Odyssey Showtimes
 
 on:
   schedule:
-    - cron: '*/10 * * * *'
+    - cron: '5 * * * *'
   workflow_dispatch:
 
 concurrency:
-  group: watch-odyssey-seats
+  group: discover-odyssey-showtimes
   cancel-in-progress: false
 
 jobs:
-  watch:
+  discover:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      issues: write
 
     steps:
       - name: Checkout
@@ -28,23 +27,21 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Check seats and notify
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python -m odyssey_watch.main
+      - name: Discover newly-published showtimes
+        run: python -m odyssey_watch.discover
 
-      - name: Commit updated seat state
+      - name: Commit discovered showtimes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          if ! git diff --quiet -- state/seen_seats.json; then
-            git add state/seen_seats.json
-            git commit -m "Update seen-seat state"
+          if ! git diff --quiet -- state/discovered_showtimes.json; then
+            git add state/discovered_showtimes.json
+            git commit -m "Update discovered showtimes"
             for i in 1 2 3; do
               git push && break
               echo "push rejected (concurrent run?), rebasing and retrying ($i)..."
               git pull --rebase origin main
             done
           else
-            echo "No state change to commit"
+            echo "No new showtimes to commit"
           fi

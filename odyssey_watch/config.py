@@ -13,6 +13,7 @@ class Theater:
     id: int
     name: str
     timezone: str
+    detail_path: str
 
 
 @dataclass(frozen=True)
@@ -40,6 +41,7 @@ class Config:
     showtimes: list[Showtime]
     prime_seats: PrimeSeats
     availability_windows: dict[str, list[list[str]]]
+    discovery_lookahead_days: int
 
 
 def load_config(path: Path) -> Config:
@@ -49,7 +51,7 @@ def load_config(path: Path) -> Config:
     theater = Theater(**raw["theater"])
     movie = Movie(**raw["movie"])
     showtimes = [
-        Showtime(id=s["id"], datetime_iso=s["datetime"]) for s in raw["showtimes"]
+        Showtime(id=s["id"], datetime_iso=s["datetime"]) for s in raw.get("showtimes", [])
     ]
     prime = raw["prime_seats"]
     prime_seats = PrimeSeats(
@@ -57,6 +59,7 @@ def load_config(path: Path) -> Config:
         seat_number_range=tuple(prime["seat_number_range"]),
     )
     availability_windows = raw.get("availability_windows", {})
+    discovery_lookahead_days = raw.get("discovery", {}).get("lookahead_days", 32)
 
     return Config(
         theater=theater,
@@ -64,4 +67,5 @@ def load_config(path: Path) -> Config:
         showtimes=showtimes,
         prime_seats=prime_seats,
         availability_windows=availability_windows,
+        discovery_lookahead_days=discovery_lookahead_days,
     )
